@@ -8,11 +8,15 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 const (
-	_baseURL = "https://api.jikan.moe/v4"
-	_version = "0.1.0"
+	_baseURL     = "https://api.jikan.moe/v4"
+	_version     = "0.1.0"
+	defaultRPS   = 3
+	defaultBurst = 3
 )
 
 type ctxKey int
@@ -30,6 +34,7 @@ type Client struct {
 	maxRetries int
 	cache      Cache
 	cacheTTL   time.Duration
+	limiter    *rate.Limiter
 
 	Anime          *AnimeService
 	Manga          *MangaService
@@ -49,6 +54,8 @@ type Client struct {
 	Random         *RandomService
 }
 
+type Option func(*Client)
+
 func New(opts ...Option) *Client {
 	u, _ := url.Parse(_baseURL)
 	c := &Client{
@@ -63,6 +70,49 @@ func New(opts ...Option) *Client {
 	}
 	c.initServices()
 	return c
+}
+
+func WithHTTPClient(hc *http.Client) Option {
+	return func(c *Client) {
+		c.client = hc
+	}
+}
+
+func WithTimeout(d time.Duration) Option {
+	return func(c *Client) {
+		c.client.Timeout = d
+	}
+}
+
+func WithRetries(n int) Option {
+	return func(c *Client) {
+		c.maxRetries = n
+	}
+}
+
+func WithCache(cache Cache, ttl time.Duration) Option {
+	return func(c *Client) {
+		c.cache = cache
+		c.cacheTTL = ttl
+	}
+}
+
+// WithRateLimit enables request rate limiting at rps requests per second.
+// Pass 0 or negative to use default (3 rps).
+func WithRateLimit(rps int) Option {
+	return func(c *Client) {
+		if rps <= 0 {
+			rps = defaultRPS
+		}
+		c.limiter = rate.NewLimiter(rate.Every(time.Second/time.Duration(rps)), defaultBurst)
+	}
+}
+
+// WithRateLimiter accepts a pre configured rate limiter for more customizable control.
+func WithRateLimiter(l *rate.Limiter) Option {
+	return func(c *Client) {
+		c.limiter = l
+	}
 }
 
 func (c *Client) initServices() {
@@ -85,6 +135,13 @@ func (c *Client) initServices() {
 }
 
 func (c *Client) Do(ctx context.Context, method, path string, q url.Values, v interface{}) error {
+	// Apply rate limiting if you configured it
+	if c.limiter != nil {
+		if err := c.limiter.Wait(ctx); err != nil {
+			return err
+		}
+	}
+
 	if c.cache != nil && method == http.MethodGet && v != nil {
 		if skip, _ := ctx.Value(ctxNoCache).(bool); !skip {
 			key := c.cacheKey(method, path, q)
