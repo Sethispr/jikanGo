@@ -45,7 +45,7 @@ func main() {
 - **Strongly Typed**: Access `char.NameKanji`, `char.Nicknames`, etc directly, no type assertions
 - **Retries**: Handles 429s and other errors with exponential backoff
 - **Caching**: Optional response caching with TTL
-- **Rate Limiting**: Built in request throttling (optional)
+- **Rate Limiting**: Optional built in request throttling
 - **Pagination**: Returns `*Pagination` with `LastPage` and `HasNext`
 - **Context Support**: All methods accept `context.Context` for timeouts
 
@@ -109,6 +109,15 @@ char, _ := client.Character.ByID(ctx, 1) // Forces API call
 
 ## Examples
 
+Get combined data (one call instead of four):
+```go
+full, err := client.Character.Full(ctx, 1)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Appears in %d anime and %d manga\n", len(full.Anime), len(full.Manga))
+```
+
 Search with pagination:
 ```go
 results, pg, err := client.Character.Search(ctx, "Spike", 1)
@@ -118,15 +127,6 @@ if err != nil {
 if pg.HasNext {
     fmt.Println("More pages available")
 }
-```
-
-Get combined data (one call instead of four):
-```go
-full, err := client.Character.Full(ctx, 1)
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Printf("Appears in %d anime and %d manga\n", len(full.Anime), len(full.Manga))
 ```
 
 Filter genres safely:
