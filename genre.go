@@ -1,10 +1,10 @@
-// genre.go
 package jikan
 
 import (
 	"context"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type GenreService struct {
@@ -18,26 +18,41 @@ type Genre struct {
 	Count int    `json:"count"`
 }
 
-func (s *GenreService) Anime(ctx context.Context, filter string) ([]Genre, error) {
-	q := url.Values{}
-	if filter != "" {
-		q.Set("filter", filter)
-	}
-	var r struct{ Data []Genre }
-	if err := s.c.Do(ctx, http.MethodGet, "/genres/anime", q, &r); err != nil {
-		return nil, err
-	}
-	return r.Data, nil
+type GenreFilter string
+
+const (
+	GenreGenres       GenreFilter = "genres"
+	GenreExplicit     GenreFilter = "explicit_genres"
+	GenreThemes       GenreFilter = "themes"
+	GenreDemographics GenreFilter = "demographics"
+)
+
+func (s *GenreService) Anime(ctx context.Context, filter GenreFilter, page, limit int) ([]*Genre, *Pagination, error) {
+	return s.list(ctx, "/genres/anime", filter, page, limit)
 }
 
-func (s *GenreService) Manga(ctx context.Context, filter string) ([]Genre, error) {
+func (s *GenreService) Manga(ctx context.Context, filter GenreFilter, page, limit int) ([]*Genre, *Pagination, error) {
+	return s.list(ctx, "/genres/manga", filter, page, limit)
+}
+
+func (s *GenreService) list(ctx context.Context, endpoint string, filter GenreFilter, page, limit int) ([]*Genre, *Pagination, error) {
 	q := url.Values{}
 	if filter != "" {
-		q.Set("filter", filter)
+		q.Set("filter", string(filter))
 	}
-	var r struct{ Data []Genre }
-	if err := s.c.Do(ctx, http.MethodGet, "/genres/manga", q, &r); err != nil {
-		return nil, err
+	if page > 0 {
+		q.Set("page", strconv.Itoa(page))
 	}
-	return r.Data, nil
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
+
+	var r struct {
+		Data       []*Genre   `json:"data"`
+		Pagination Pagination `json:"pagination"`
+	}
+	if err := s.c.Do(ctx, http.MethodGet, endpoint, q, &r); err != nil {
+		return nil, nil, err
+	}
+	return r.Data, &r.Pagination, nil
 }
