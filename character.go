@@ -23,33 +23,38 @@ type Character struct {
 	Favorites int      `json:"favorites"`
 }
 
-type Appearance struct {
+type Entry struct {
 	MalID  ID       `json:"mal_id"`
 	URL    string   `json:"url"`
 	Images ImageSet `json:"images"`
 	Title  string   `json:"title"`
 }
 
+type CharacterAppearance struct {
+	Role  string `json:"role"`
+	Entry Entry  `json:"-"`
+}
+
 type CharacterAnime struct {
-	Role  string     `json:"role"`
-	Anime Appearance `json:"anime"`
+	Role  string `json:"role"`
+	Anime Entry  `json:"anime"`
 }
 
 type CharacterManga struct {
-	Role  string     `json:"role"`
-	Manga Appearance `json:"manga"`
+	Role  string `json:"role"`
+	Manga Entry  `json:"manga"`
+}
+
+type Person struct {
+	MalID  ID       `json:"mal_id"`
+	URL    string   `json:"url"`
+	Images ImageSet `json:"images"`
+	Name   string   `json:"name"`
 }
 
 type CharacterVoice struct {
 	Language string `json:"language"`
-	Person   struct {
-		MalID  ID     `json:"mal_id"`
-		URL    string `json:"url"`
-		Images struct {
-			JPG ImageURL `json:"jpg"`
-		} `json:"images"`
-		Name string `json:"name"`
-	} `json:"person"`
+	Person   Person `json:"person"`
 }
 
 type CharacterPicture struct {
@@ -58,10 +63,6 @@ type CharacterPicture struct {
 }
 
 func (s *CharacterService) ByID(ctx context.Context, id ID) (*Character, error) {
-	if id <= 0 {
-		return nil, fmt.Errorf("invalid character ID: %d", id)
-	}
-
 	var r struct {
 		Data Character `json:"data"`
 	}
@@ -72,10 +73,6 @@ func (s *CharacterService) ByID(ctx context.Context, id ID) (*Character, error) 
 }
 
 func (s *CharacterService) Anime(ctx context.Context, id ID) ([]CharacterAnime, error) {
-	if id <= 0 {
-		return nil, fmt.Errorf("invalid character ID: %d", id)
-	}
-
 	var r struct {
 		Data []CharacterAnime `json:"data"`
 	}
@@ -86,10 +83,6 @@ func (s *CharacterService) Anime(ctx context.Context, id ID) ([]CharacterAnime, 
 }
 
 func (s *CharacterService) Manga(ctx context.Context, id ID) ([]CharacterManga, error) {
-	if id <= 0 {
-		return nil, fmt.Errorf("invalid character ID: %d", id)
-	}
-
 	var r struct {
 		Data []CharacterManga `json:"data"`
 	}
@@ -100,10 +93,6 @@ func (s *CharacterService) Manga(ctx context.Context, id ID) ([]CharacterManga, 
 }
 
 func (s *CharacterService) Voices(ctx context.Context, id ID) ([]CharacterVoice, error) {
-	if id <= 0 {
-		return nil, fmt.Errorf("invalid character ID: %d", id)
-	}
-
 	var r struct {
 		Data []CharacterVoice `json:"data"`
 	}
@@ -113,11 +102,9 @@ func (s *CharacterService) Voices(ctx context.Context, id ID) ([]CharacterVoice,
 	return r.Data, nil
 }
 
+// Pictures retrieves all gallery pictures associated with the character.
+// These are typically additional images beyond the main image in the Character struct.
 func (s *CharacterService) Pictures(ctx context.Context, id ID) ([]CharacterPicture, error) {
-	if id <= 0 {
-		return nil, fmt.Errorf("invalid character ID: %d", id)
-	}
-
 	var r struct {
 		Data []CharacterPicture `json:"data"`
 	}
@@ -128,17 +115,14 @@ func (s *CharacterService) Pictures(ctx context.Context, id ID) ([]CharacterPict
 }
 
 func (s *CharacterService) Search(ctx context.Context, query string, page int) ([]Character, *Pagination, error) {
-	if page < 1 {
-		return nil, nil, fmt.Errorf("page must be >= 1, got %d", page)
+	q := url.Values{}
+	if query != "" {
+		q.Set("q", query)
 	}
-	if query == "" {
-		return nil, nil, fmt.Errorf("search query cannot be empty")
+	if page > 0 {
+		q.Set("page", strconv.Itoa(page))
 	}
 
-	q := url.Values{
-		"q":    {query},
-		"page": {strconv.Itoa(page)},
-	}
 	var r struct {
 		Data       []Character `json:"data"`
 		Pagination Pagination  `json:"pagination"`
