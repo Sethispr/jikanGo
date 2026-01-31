@@ -30,11 +30,6 @@ type Entry struct {
 	Title  string   `json:"title"`
 }
 
-type CharacterAppearance struct {
-	Role  string `json:"role"`
-	Entry Entry  `json:"-"`
-}
-
 type CharacterAnime struct {
 	Role  string `json:"role"`
 	Anime Entry  `json:"anime"`
@@ -45,7 +40,7 @@ type CharacterManga struct {
 	Manga Entry  `json:"manga"`
 }
 
-type Person struct {
+type VoiceActor struct {
 	MalID  ID       `json:"mal_id"`
 	URL    string   `json:"url"`
 	Images ImageSet `json:"images"`
@@ -53,8 +48,8 @@ type Person struct {
 }
 
 type CharacterVoice struct {
-	Language string `json:"language"`
-	Person   Person `json:"person"`
+	Language string     `json:"language"`
+	Person   VoiceActor `json:"person"`
 }
 
 type CharacterPicture struct {
@@ -62,7 +57,24 @@ type CharacterPicture struct {
 	LargeImageURL string `json:"large_image_url"`
 }
 
+type CharacterFull struct {
+	Character `json:",inline"`
+	Anime     []CharacterAnime `json:"anime"`
+	Manga     []CharacterManga `json:"manga"`
+	Voices    []CharacterVoice `json:"voices"`
+}
+
+func (s *CharacterService) validateID(id ID) error {
+	if id < 1 {
+		return fmt.Errorf("invalid character id: %d", id)
+	}
+	return nil
+}
+
 func (s *CharacterService) ByID(ctx context.Context, id ID) (*Character, error) {
+	if err := s.validateID(id); err != nil {
+		return nil, err
+	}
 	var r struct {
 		Data Character `json:"data"`
 	}
@@ -72,7 +84,23 @@ func (s *CharacterService) ByID(ctx context.Context, id ID) (*Character, error) 
 	return &r.Data, nil
 }
 
+func (s *CharacterService) Full(ctx context.Context, id ID) (*CharacterFull, error) {
+	if err := s.validateID(id); err != nil {
+		return nil, err
+	}
+	var r struct {
+		Data CharacterFull `json:"data"`
+	}
+	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/characters/%d/full", id), nil, &r); err != nil {
+		return nil, err
+	}
+	return &r.Data, nil
+}
+
 func (s *CharacterService) Anime(ctx context.Context, id ID) ([]CharacterAnime, error) {
+	if err := s.validateID(id); err != nil {
+		return nil, err
+	}
 	var r struct {
 		Data []CharacterAnime `json:"data"`
 	}
@@ -83,6 +111,9 @@ func (s *CharacterService) Anime(ctx context.Context, id ID) ([]CharacterAnime, 
 }
 
 func (s *CharacterService) Manga(ctx context.Context, id ID) ([]CharacterManga, error) {
+	if err := s.validateID(id); err != nil {
+		return nil, err
+	}
 	var r struct {
 		Data []CharacterManga `json:"data"`
 	}
@@ -93,6 +124,9 @@ func (s *CharacterService) Manga(ctx context.Context, id ID) ([]CharacterManga, 
 }
 
 func (s *CharacterService) Voices(ctx context.Context, id ID) ([]CharacterVoice, error) {
+	if err := s.validateID(id); err != nil {
+		return nil, err
+	}
 	var r struct {
 		Data []CharacterVoice `json:"data"`
 	}
@@ -102,9 +136,10 @@ func (s *CharacterService) Voices(ctx context.Context, id ID) ([]CharacterVoice,
 	return r.Data, nil
 }
 
-// Pictures retrieves all gallery pictures associated with the character.
-// These are typically additional images beyond the main image in the Character struct.
 func (s *CharacterService) Pictures(ctx context.Context, id ID) ([]CharacterPicture, error) {
+	if err := s.validateID(id); err != nil {
+		return nil, err
+	}
 	var r struct {
 		Data []CharacterPicture `json:"data"`
 	}
@@ -114,7 +149,7 @@ func (s *CharacterService) Pictures(ctx context.Context, id ID) ([]CharacterPict
 	return r.Data, nil
 }
 
-func (s *CharacterService) Search(ctx context.Context, query string, page int) ([]Character, *Pagination, error) {
+func (s *CharacterService) Search(ctx context.Context, query string, page int) ([]*Character, *Pagination, error) {
 	q := url.Values{}
 	if query != "" {
 		q.Set("q", query)
@@ -122,10 +157,9 @@ func (s *CharacterService) Search(ctx context.Context, query string, page int) (
 	if page > 0 {
 		q.Set("page", strconv.Itoa(page))
 	}
-
 	var r struct {
-		Data       []Character `json:"data"`
-		Pagination Pagination  `json:"pagination"`
+		Data       []*Character `json:"data"`
+		Pagination Pagination   `json:"pagination"`
 	}
 	if err := s.c.Do(ctx, http.MethodGet, "/characters", q, &r); err != nil {
 		return nil, nil, err
