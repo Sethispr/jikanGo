@@ -1,6 +1,9 @@
 name: gofmt
 on: [push, pull_request]
 
+permissions:
+  contents: write
+
 jobs:
   gofmt:
     runs-on: ubuntu-latest
