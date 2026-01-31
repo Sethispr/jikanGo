@@ -18,17 +18,17 @@ import (
 
 func main() {
 	var (
-		id    = flag.Int("id", 0, "Character ID (e.g., 1 for Spike Spiegel)")
+		id    = flag.Int("id", 0, "Character ID (ex: 1 for Spike Spiegel)")
 		query = flag.String("search", "", "Search characters by name")
 		page  = flag.Int("page", 1, "Page number for search results")
 	)
 	flag.Parse()
 
 	if *id == 0 && *query == "" {
-		fmt.Fprint(os.Stderr, "Enter Character ID or search query: ")
+		fmt.Fprint(os.Stderr, "Enter Character ID or search by name: ")
 		scanner := bufio.NewScanner(os.Stdin)
 		if !scanner.Scan() {
-			log.Fatal("No input")
+			log.Fatal("No input..") // dies insta which is okay enough for now
 		}
 		input := strings.TrimSpace(scanner.Text())
 		if num, err := strconv.Atoi(input); err == nil {
@@ -51,7 +51,7 @@ func main() {
 	}
 
 	if err := showCharacterDetails(ctx, client, jikan.ID(*id)); err != nil {
-		log.Fatalf("Error: %v", err)
+		log.Fatalf("[ERR]: %v", err)
 	}
 }
 
@@ -62,7 +62,7 @@ func searchCharacters(ctx context.Context, c *jikan.Client, query string, page i
 	}
 
 	if len(characters) == 0 {
-		fmt.Println("No characters found")
+		fmt.Println("No characters found..")
 		return nil
 	}
 
@@ -83,7 +83,7 @@ func searchCharacters(ctx context.Context, c *jikan.Client, query string, page i
 	if pagination.LastPage > 1 {
 		fmt.Fprintf(os.Stderr, "\nPage %d of %d (Total: %d)\n",
 			page, pagination.LastPage, pagination.Items.Total)
-		fmt.Fprintf(os.Stderr, "Use -page flag to navigate pages\n")
+		fmt.Fprintf(os.Stderr, "Use -page flag to change pages\n")
 	}
 
 	return nil
@@ -216,4 +216,3 @@ func truncate(s string, maxLen int) string {
 	}
 	return s[:maxLen-3] + "..."
 }
-
