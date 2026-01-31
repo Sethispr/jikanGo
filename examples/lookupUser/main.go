@@ -16,12 +16,12 @@ import (
 
 func main() {
 	fmt.Print("Lookup a MAL username: ")
-	
+
 	scanner := bufio.NewScanner(os.Stdin)
 	if !scanner.Scan() {
 		log.Fatal("Failed to read the input..")
 	}
-	
+
 	username := strings.TrimSpace(scanner.Text())
 	if username == "" {
 		log.Fatal("Username is empty..")
@@ -31,9 +31,9 @@ func main() {
 	defer cancel()
 
 	client := jikan.New(jikan.WithTimeout(15 * time.Second))
-	
+
 	fmt.Printf("\nFetching profile for '%s'..\n\n", username)
-	
+
 	user, stats, err := fetchUserData(ctx, client, username)
 	if err != nil {
 		var apiErr *jikan.Error
@@ -44,10 +44,10 @@ func main() {
 	}
 
 	printUser(user, stats)
-	
+
 	aboutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
+
 	about, err := client.User.About(aboutCtx, username)
 	if err == nil && about != "" {
 		fmt.Printf("About:\n%.200s...\n\n", about)
@@ -60,22 +60,22 @@ func fetchUserData(ctx context.Context, client *jikan.Client, username string) (
 		stats *jikan.UserStatistics
 		err   error
 	}
-	
+
 	ch := make(chan result, 2)
-	
+
 	go func() {
 		u, err := client.User.ByID(ctx, username)
 		ch <- result{user: u, err: err}
 	}()
-	
+
 	go func() {
 		s, err := client.User.Statistics(ctx, username)
 		ch <- result{stats: s, err: err}
 	}()
-	
+
 	var user *jikan.User
 	var stats *jikan.UserStatistics
-	
+
 	for i := 0; i < 2; i++ {
 		r := <-ch
 		if r.err != nil {
@@ -88,13 +88,13 @@ func fetchUserData(ctx context.Context, client *jikan.Client, username string) (
 			stats = r.stats
 		}
 	}
-	
+
 	return user, stats, nil
 }
 
 func printUser(u *jikan.User, s *jikan.UserStatistics) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	
+
 	fmt.Fprintf(w, "Username:\t%s\n", u.Username)
 	fmt.Fprintf(w, "Profile:\t%s\n", u.URL)
 	fmt.Fprintf(w, "Gender:\t%s\n", na(u.Gender))
@@ -132,7 +132,7 @@ func printUser(u *jikan.User, s *jikan.UserStatistics) {
 		fmt.Fprintf(w, "Volumes Read:\t%d\n", s.Manga.VolumesRead)
 		w.Flush()
 	}
-	
+
 	fmt.Println()
 }
 

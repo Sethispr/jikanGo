@@ -9,9 +9,9 @@ import (
 )
 
 type ClubMember struct {
-	Username   string `json:"username"`
-	URL        string `json:"url"`
-	Images     struct {
+	Username string `json:"username"`
+	URL      string `json:"url"`
+	Images   struct {
 		JPG struct {
 			ImageURL string `json:"image_url"`
 		} `json:"jpg"`
@@ -35,12 +35,16 @@ type ClubService struct {
 }
 
 type Club struct {
-	MalID    int    `json:"mal_id"`
-	Name     string `json:"name"`
-	URL      string `json:"url"`
-	Images   struct {
-		JPG  struct{ ImageURL string `json:"image_url"` } `json:"jpg"`
-		WebP struct{ ImageURL string `json:"image_url"` } `json:"webp"`
+	MalID  int    `json:"mal_id"`
+	Name   string `json:"name"`
+	URL    string `json:"url"`
+	Images struct {
+		JPG struct {
+			ImageURL string `json:"image_url"`
+		} `json:"jpg"`
+		WebP struct {
+			ImageURL string `json:"image_url"`
+		} `json:"webp"`
 	} `json:"images"`
 	Members  int    `json:"members"`
 	Category string `json:"category"`

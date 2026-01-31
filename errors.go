@@ -28,9 +28,9 @@ func (e *Error) Is(target error) bool {
 	return e.Status == t.Status
 }
 
-func (e *Error) IsNotFound() bool     { return e.Status == http.StatusNotFound }
-func (e *Error) IsRateLimit() bool    { return e.Status == http.StatusTooManyRequests }
-func (e *Error) IsServerError() bool  { return e.Status >= 500 && e.Status < 600 }
+func (e *Error) IsNotFound() bool    { return e.Status == http.StatusNotFound }
+func (e *Error) IsRateLimit() bool   { return e.Status == http.StatusTooManyRequests }
+func (e *Error) IsServerError() bool { return e.Status >= 500 && e.Status < 600 }
 
 func parseError(resp *http.Response) error {
 	var e Error

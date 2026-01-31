@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type RandomService struct { c *Client }
+type RandomService struct{ c *Client }
 
 func (s *RandomService) Anime(ctx context.Context) (*Anime, error) {
 	var r struct{ Data Anime }

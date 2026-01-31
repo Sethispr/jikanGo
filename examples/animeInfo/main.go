@@ -81,15 +81,15 @@ func searchAndShow(ctx context.Context, c *jikan.Client, query string) {
 
 	for i, a := range results {
 		fmt.Printf("\nResult %d/%d \n", i+1, len(results))
-		
+
 		// Get details
 		stats, _ := c.Anime.Statistics(ctx, a.MalID)
 		rels, _ := c.Anime.Relations(ctx, a.MalID)
 		themes, _ := c.Anime.Themes(ctx, a.MalID)
 		ext, _ := c.Anime.External(ctx, a.MalID)
-		
+
 		printAnime(&a, stats, rels, themes, ext)
-		
+
 		if i < len(results)-1 {
 			fmt.Println("\nPress Enter..")
 			bufio.NewReader(os.Stdin).ReadBytes('\n')
@@ -141,7 +141,7 @@ func printAnime(a *jikan.Anime, stats *struct {
 
 	if stats != nil {
 		fmt.Println("\nStats")
-		fmt.Printf("Watching: %d | Completed: %d | Dropped: %d\n", 
+		fmt.Printf("Watching: %d | Completed: %d | Dropped: %d\n",
 			stats.Watching, stats.Completed, stats.Dropped)
 	}
 
@@ -177,7 +177,7 @@ func printAnime(a *jikan.Anime, stats *struct {
 	if a.Synopsis != "" {
 		fmt.Printf("\nSynopsis:\n%.300s...\n", a.Synopsis)
 	}
-	
+
 	if a.Images.JPG.Large != "" {
 		fmt.Printf("\nImage: %s\n", a.Images.JPG.Large)
 	}

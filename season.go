@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-type SeasonService struct { c *Client }
+type SeasonService struct{ c *Client }
 
 func (s *SeasonService) Now(ctx context.Context, page int) ([]Anime, *Pagination, error) {
 	q := url.Values{"page": {strconv.Itoa(page)}}

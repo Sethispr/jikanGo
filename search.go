@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type SearchService struct { c *Client }
+type SearchService struct{ c *Client }
 
 func (s *SearchService) Anime(ctx context.Context, query string, opts struct {
 	Type    string
@@ -20,16 +20,34 @@ func (s *SearchService) Anime(ctx context.Context, query string, opts struct {
 	Limit   int
 }) ([]Anime, *Pagination, error) {
 	q := url.Values{}
-	if query != "" { q.Set("q", query) }
-	if opts.Type != "" { q.Set("type", opts.Type) }
-	if opts.Status != "" { q.Set("status", opts.Status) }
-	if opts.Rating != "" { q.Set("rating", opts.Rating) }
-	if len(opts.Genres) > 0 { q.Set("genres", joinInts(opts.Genres, ",")) }
-	if opts.OrderBy != "" { q.Set("order_by", opts.OrderBy) }
-	if opts.Sort != "" { q.Set("sort", opts.Sort) }
-	if opts.Page > 0 { q.Set("page", strconv.Itoa(opts.Page)) }
-	if opts.Limit > 0 { q.Set("limit", strconv.Itoa(opts.Limit)) }
-	
+	if query != "" {
+		q.Set("q", query)
+	}
+	if opts.Type != "" {
+		q.Set("type", opts.Type)
+	}
+	if opts.Status != "" {
+		q.Set("status", opts.Status)
+	}
+	if opts.Rating != "" {
+		q.Set("rating", opts.Rating)
+	}
+	if len(opts.Genres) > 0 {
+		q.Set("genres", joinInts(opts.Genres, ","))
+	}
+	if opts.OrderBy != "" {
+		q.Set("order_by", opts.OrderBy)
+	}
+	if opts.Sort != "" {
+		q.Set("sort", opts.Sort)
+	}
+	if opts.Page > 0 {
+		q.Set("page", strconv.Itoa(opts.Page))
+	}
+	if opts.Limit > 0 {
+		q.Set("limit", strconv.Itoa(opts.Limit))
+	}
+
 	var r struct {
 		Data       []Anime    `json:"data"`
 		Pagination Pagination `json:"pagination"`

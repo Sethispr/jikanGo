@@ -14,8 +14,8 @@ type ReviewService struct {
 }
 
 type Review struct {
-	MalID     int    `json:"mal_id"`
-	Score     int    `json:"score"`
+	MalID     int `json:"mal_id"`
+	Score     int `json:"score"`
 	Reactions struct {
 		Overall int `json:"overall"`
 	} `json:"reactions"`

@@ -16,6 +16,7 @@ const (
 )
 
 type ctxKey int
+
 const ctxNoCache ctxKey = 1
 
 func NoCache(ctx context.Context) context.Context {
@@ -95,7 +96,7 @@ func (c *Client) Do(ctx context.Context, method, path string, q url.Values, v in
 
 	var lastErr error
 	backoff := 100 * time.Millisecond
-	
+
 	for attempt := 0; attempt <= c.maxRetries; attempt++ {
 		if attempt > 0 {
 			select {

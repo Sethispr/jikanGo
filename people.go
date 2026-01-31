@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type PeopleService struct { c *Client }
+type PeopleService struct{ c *Client }
 
 type Person struct {
 	MalID          ID       `json:"mal_id"`

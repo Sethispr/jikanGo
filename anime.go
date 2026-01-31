@@ -13,10 +13,10 @@ type AnimeService struct {
 }
 
 type Anime struct {
-	MalID          ID       `json:"mal_id"`
-	URL            string   `json:"url"`
-	Images         ImageSet `json:"images"`
-	Trailer        struct {
+	MalID   ID       `json:"mal_id"`
+	URL     string   `json:"url"`
+	Images  ImageSet `json:"images"`
+	Trailer struct {
 		YoutubeID string `json:"youtube_id"`
 		URL       string `json:"url"`
 		EmbedURL  string `json:"embed_url"`
@@ -29,27 +29,27 @@ type Anime struct {
 		} `json:"images"`
 	} `json:"trailer"`
 	Title         string    `json:"title"`
-	TitleEnglish  string   `json:"title_english"`
-	TitleJapanese string   `json:"title_japanese"`
-	TitleSynonyms []string `json:"title_synonyms"`
-	Type          string   `json:"type"`
-	Source        string   `json:"source"`
-	Episodes      int      `json:"episodes"`
-	Status        string   `json:"status"`
-	Airing        bool     `json:"airing"`
+	TitleEnglish  string    `json:"title_english"`
+	TitleJapanese string    `json:"title_japanese"`
+	TitleSynonyms []string  `json:"title_synonyms"`
+	Type          string    `json:"type"`
+	Source        string    `json:"source"`
+	Episodes      int       `json:"episodes"`
+	Status        string    `json:"status"`
+	Airing        bool      `json:"airing"`
 	Aired         DateRange `json:"aired"`
-	Duration      string   `json:"duration"`
-	Rating        string   `json:"rating"`
-	Score         float64  `json:"score"`
-	ScoredBy      int      `json:"scored_by"`
-	Rank          int      `json:"rank"`
-	Popularity    int      `json:"popularity"`
-	Members       int      `json:"members"`
-	Favorites     int      `json:"favorites"`
-	Synopsis      string   `json:"synopsis"`
-	Background    string   `json:"background"`
-	Season        string   `json:"season"`
-	Year          int      `json:"year"`
+	Duration      string    `json:"duration"`
+	Rating        string    `json:"rating"`
+	Score         float64   `json:"score"`
+	ScoredBy      int       `json:"scored_by"`
+	Rank          int       `json:"rank"`
+	Popularity    int       `json:"popularity"`
+	Members       int       `json:"members"`
+	Favorites     int       `json:"favorites"`
+	Synopsis      string    `json:"synopsis"`
+	Background    string    `json:"background"`
+	Season        string    `json:"season"`
+	Year          int       `json:"year"`
 	Broadcast     struct {
 		Day      string `json:"day"`
 		Time     string `json:"time"`
@@ -81,14 +81,16 @@ func (s *AnimeService) Characters(ctx context.Context, id ID) ([]struct {
 		Language string   `json:"language"`
 	} `json:"voice_actors"`
 }, error) {
-	var r struct{ Data []struct {
-		Character   Resource `json:"character"`
-		Role        string   `json:"role"`
-		VoiceActors []struct {
-			Person   Resource `json:"person"`
-			Language string   `json:"language"`
-		} `json:"voice_actors"`
-	} }
+	var r struct {
+		Data []struct {
+			Character   Resource `json:"character"`
+			Role        string   `json:"role"`
+			VoiceActors []struct {
+				Person   Resource `json:"person"`
+				Language string   `json:"language"`
+			} `json:"voice_actors"`
+		}
+	}
 	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/anime/%d/characters", id), nil, &r); err != nil {
 		return nil, err
 	}
@@ -99,10 +101,12 @@ func (s *AnimeService) Staff(ctx context.Context, id ID) ([]struct {
 	Person    Resource `json:"person"`
 	Positions []string `json:"positions"`
 }, error) {
-	var r struct{ Data []struct {
-		Person    Resource `json:"person"`
-		Positions []string `json:"positions"`
-	} }
+	var r struct {
+		Data []struct {
+			Person    Resource `json:"person"`
+			Positions []string `json:"positions"`
+		}
+	}
 	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/anime/%d/staff", id), nil, &r); err != nil {
 		return nil, err
 	}
@@ -153,18 +157,20 @@ func (s *AnimeService) EpisodeByID(ctx context.Context, animeID ID, episode int)
 	Filler        bool    `json:"filler"`
 	Recap         bool    `json:"recap"`
 }, error) {
-	var r struct{ Data struct {
-		MalID         ID      `json:"mal_id"`
-		URL           string  `json:"url"`
-		Title         string  `json:"title"`
-		TitleJapanese string  `json:"title_japanese"`
-		TitleRomanji  string  `json:"title_romanji"`
-		Synopsis      string  `json:"synopsis"`
-		Aired         string  `json:"aired"`
-		Score         float64 `json:"score"`
-		Filler        bool    `json:"filler"`
-		Recap         bool    `json:"recap"`
-	} }
+	var r struct {
+		Data struct {
+			MalID         ID      `json:"mal_id"`
+			URL           string  `json:"url"`
+			Title         string  `json:"title"`
+			TitleJapanese string  `json:"title_japanese"`
+			TitleRomanji  string  `json:"title_romanji"`
+			Synopsis      string  `json:"synopsis"`
+			Aired         string  `json:"aired"`
+			Score         float64 `json:"score"`
+			Filler        bool    `json:"filler"`
+			Recap         bool    `json:"recap"`
+		}
+	}
 	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/anime/%d/episodes/%d", animeID, episode), nil, &r); err != nil {
 		return nil, err
 	}
@@ -259,34 +265,36 @@ func (s *AnimeService) Videos(ctx context.Context, id ID) (*struct {
 		} `json:"images"`
 	} `json:"episodes"`
 }, error) {
-	var r struct{ Data struct {
-		Promos []struct {
-			Title   string `json:"title"`
-			Trailer struct {
-				YoutubeID string `json:"youtube_id"`
-				URL       string `json:"url"`
-				EmbedURL  string `json:"embed_url"`
-				Images    struct {
-					DefaultImageURL string `json:"default_image_url"`
-					SmallImageURL   string `json:"small_image_url"`
-					MediumImageURL  string `json:"medium_image_url"`
-					LargeImageURL   string `json:"large_image_url"`
-					MaximumImageURL string `json:"maximum_image_url"`
+	var r struct {
+		Data struct {
+			Promos []struct {
+				Title   string `json:"title"`
+				Trailer struct {
+					YoutubeID string `json:"youtube_id"`
+					URL       string `json:"url"`
+					EmbedURL  string `json:"embed_url"`
+					Images    struct {
+						DefaultImageURL string `json:"default_image_url"`
+						SmallImageURL   string `json:"small_image_url"`
+						MediumImageURL  string `json:"medium_image_url"`
+						LargeImageURL   string `json:"large_image_url"`
+						MaximumImageURL string `json:"maximum_image_url"`
+					} `json:"images"`
+				} `json:"trailer"`
+			} `json:"promos"`
+			Episodes []struct {
+				MalID   ID     `json:"mal_id"`
+				URL     string `json:"url"`
+				Title   string `json:"title"`
+				Episode string `json:"episode"`
+				Images  struct {
+					JPG struct {
+						ImageURL string `json:"image_url"`
+					} `json:"jpg"`
 				} `json:"images"`
-			} `json:"trailer"`
-		} `json:"promos"`
-		Episodes []struct {
-			MalID   ID     `json:"mal_id"`
-			URL     string `json:"url"`
-			Title   string `json:"title"`
-			Episode string `json:"episode"`
-			Images  struct {
-				JPG struct {
-					ImageURL string `json:"image_url"`
-				} `json:"jpg"`
-			} `json:"images"`
-		} `json:"episodes"`
-	} }
+			} `json:"episodes"`
+		}
+	}
 	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/anime/%d/videos", id), nil, &r); err != nil {
 		return nil, err
 	}
@@ -323,19 +331,21 @@ func (s *AnimeService) Statistics(ctx context.Context, id ID) (*struct {
 		Percentage float64 `json:"percentage"`
 	} `json:"scores"`
 }, error) {
-	var r struct{ Data struct {
-		Watching    int `json:"watching"`
-		Completed   int `json:"completed"`
-		OnHold      int `json:"on_hold"`
-		Dropped     int `json:"dropped"`
-		PlanToWatch int `json:"plan_to_watch"`
-		Total       int `json:"total"`
-		Scores      []struct {
-			Score      int     `json:"score"`
-			Votes      int     `json:"votes"`
-			Percentage float64 `json:"percentage"`
-		} `json:"scores"`
-	} }
+	var r struct {
+		Data struct {
+			Watching    int `json:"watching"`
+			Completed   int `json:"completed"`
+			OnHold      int `json:"on_hold"`
+			Dropped     int `json:"dropped"`
+			PlanToWatch int `json:"plan_to_watch"`
+			Total       int `json:"total"`
+			Scores      []struct {
+				Score      int     `json:"score"`
+				Votes      int     `json:"votes"`
+				Percentage float64 `json:"percentage"`
+			} `json:"scores"`
+		}
+	}
 	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/anime/%d/statistics", id), nil, &r); err != nil {
 		return nil, err
 	}
@@ -462,10 +472,12 @@ func (s *AnimeService) Themes(ctx context.Context, id ID) (*struct {
 	Openings []string `json:"openings"`
 	Endings  []string `json:"endings"`
 }, error) {
-	var r struct{ Data struct {
-		Openings []string `json:"openings"`
-		Endings  []string `json:"endings"`
-	} }
+	var r struct {
+		Data struct {
+			Openings []string `json:"openings"`
+			Endings  []string `json:"endings"`
+		}
+	}
 	if err := s.c.Do(ctx, http.MethodGet, fmt.Sprintf("/anime/%d/themes", id), nil, &r); err != nil {
 		return nil, err
 	}

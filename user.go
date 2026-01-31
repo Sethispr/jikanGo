@@ -13,12 +13,16 @@ type UserService struct {
 }
 
 type User struct {
-	MalID      ID     `json:"mal_id"`
-	Username   string `json:"username"`
-	URL        string `json:"url"`
-	Images     struct {
-		JPG  struct{ ImageURL string `json:"image_url"` } `json:"jpg"`
-		WebP struct{ ImageURL string `json:"image_url"` } `json:"webp"`
+	MalID    ID     `json:"mal_id"`
+	Username string `json:"username"`
+	URL      string `json:"url"`
+	Images   struct {
+		JPG struct {
+			ImageURL string `json:"image_url"`
+		} `json:"jpg"`
+		WebP struct {
+			ImageURL string `json:"image_url"`
+		} `json:"webp"`
 	} `json:"images"`
 	LastOnline string `json:"last_online"`
 	Gender     string `json:"gender"`
@@ -112,12 +116,12 @@ func (s *UserService) History(ctx context.Context, username string, filter strin
 	Date      string   `json:"date"`
 	Score     *float64 `json:"score"`
 }, *Pagination, error) {
-	
+
 	q := url.Values{"page": {strconv.Itoa(page)}}
 	if filter != "" {
 		q.Set("filter", filter)
 	}
-	
+
 	var r struct {
 		Data []struct {
 			Entry     Resource `json:"entry"`
@@ -138,7 +142,7 @@ func (s *UserService) Friends(ctx context.Context, username string, page int) ([
 	LastOnline   string   `json:"last_online"`
 	FriendsSince string   `json:"friends_since"`
 }, *Pagination, error) {
-	
+
 	q := url.Values{"page": {strconv.Itoa(page)}}
 	var r struct {
 		Data []struct {
@@ -160,7 +164,7 @@ func (s *UserService) Favorites(ctx context.Context, username string) (*struct {
 	Characters []UserFavoriteChar   `json:"characters"`
 	People     []UserFavoritePerson `json:"people"`
 }, error) {
-	
+
 	var r struct {
 		Data struct {
 			Anime      []UserFavoriteEntry  `json:"anime"`
@@ -176,23 +180,23 @@ func (s *UserService) Favorites(ctx context.Context, username string) (*struct {
 }
 
 func (s *UserService) Reviews(ctx context.Context, username string, page int) ([]struct {
-	MalID    int      `json:"mal_id"`
-	Entry    Resource `json:"entry"`
-	Score    int      `json:"score"`
-	Review   string   `json:"review"`
-	Date     string   `json:"date"`
-	Votes    int      `json:"votes"`
+	MalID  int      `json:"mal_id"`
+	Entry  Resource `json:"entry"`
+	Score  int      `json:"score"`
+	Review string   `json:"review"`
+	Date   string   `json:"date"`
+	Votes  int      `json:"votes"`
 }, *Pagination, error) {
-	
+
 	q := url.Values{"page": {strconv.Itoa(page)}}
 	var r struct {
 		Data []struct {
-			MalID    int      `json:"mal_id"`
-			Entry    Resource `json:"entry"`
-			Score    int      `json:"score"`
-			Review   string   `json:"review"`
-			Date     string   `json:"date"`
-			Votes    int      `json:"votes"`
+			MalID  int      `json:"mal_id"`
+			Entry  Resource `json:"entry"`
+			Score  int      `json:"score"`
+			Review string   `json:"review"`
+			Date   string   `json:"date"`
+			Votes  int      `json:"votes"`
 		} `json:"data"`
 		Pagination Pagination `json:"pagination"`
 	}
@@ -208,7 +212,7 @@ func (s *UserService) Recommendations(ctx context.Context, username string, page
 	Content string     `json:"content"`
 	Date    string     `json:"date"`
 }, *Pagination, error) {
-	
+
 	q := url.Values{"page": {strconv.Itoa(page)}}
 	var r struct {
 		Data []struct {
@@ -230,7 +234,7 @@ func (s *UserService) Clubs(ctx context.Context, username string, page int) ([]s
 	Name  string `json:"name"`
 	URL   string `json:"url"`
 }, *Pagination, error) {
-	
+
 	q := url.Values{"page": {strconv.Itoa(page)}}
 	var r struct {
 		Data []struct {
