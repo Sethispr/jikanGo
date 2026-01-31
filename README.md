@@ -75,6 +75,38 @@ client := jikan.New(jikan.WithRateLimiter(lim))
 
 The rate limiter respects context cancellation. If your context times out while waiting for the rate limiter, it returns immediately with the context error.
 
+## Caching
+
+Avoid hitting the API twice for the same data. The client accepts any cache implementing the `Cache` interface.
+
+In memory cache (included):
+```go
+cache := jikan.NewMemoryCache()
+defer cache.Stop()
+
+client := jikan.New(
+    jikan.WithCache(cache, 5*time.Minute),
+)
+```
+
+Bring your own (Redis, etc):
+```go
+type RedisCache struct { client *redis.Client }
+func (r *RedisCache) Get(ctx context.Context, key string, dst interface{}) error { ... }
+func (r *RedisCache) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error { ... }
+func (r *RedisCache) Delete(ctx context.Context, key string) error { ... }
+
+client := jikan.New(jikan.WithCache(&RedisCache{redisClient}, time.Hour))
+```
+
+Skip cache for specific requests:
+```go
+ctx := jikan.NoCache(context.Background())
+char, _ := client.Character.ByID(ctx, 1) // Forces API call
+```
+
+---
+
 ## Examples
 
 Search with pagination:
