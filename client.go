@@ -222,3 +222,20 @@ func (c *Client) cacheKey(method, path string, q url.Values) string {
 	}
 	return fmt.Sprintf("%x", h.Sum64())
 }
+
+func fetch[T any](ctx context.Context, c *Client, path string, query url.Values) (T, error) {
+	var r struct {
+		Data T `json:"data"`
+	}
+	err := c.Do(ctx, http.MethodGet, path, query, &r)
+	return r.Data, err
+}
+
+func fetchPaged[T any](ctx context.Context, c *Client, path string, query url.Values) (T, *Pagination, error) {
+	var r struct {
+		Data       T          `json:"data"`
+		Pagination Pagination `json:"pagination"`
+	}
+	err := c.Do(ctx, http.MethodGet, path, query, &r)
+	return r.Data, &r.Pagination, err
+}
